@@ -13,7 +13,7 @@ ui <- navbarPage(
                              choices = list('Dataset' = "datatersedia", 'Tabel Frekuensi' = "tabel_frek", 'Upload File csv' = "upload_file")),
                  conditionalPanel(
                    condition = "input.jenisdata == 'datatersedia'",
-                   selectInput(inputId = "var_kategorik", label = "Dataset Tersedia :", choices = list('Sumber Air Minum' = "Sumber Air Minum", 'Tempat Pembuangan Sampah' = "Tempat Pembuangan Sampah", 'Fasilitas BAB' = "Fasilitas Buang Air Besar"))
+                   selectInput(inputId = "var_kategorik", label = "Dataset Tersedia :", choices = c("Not Selected"))
                  ),
                  conditionalPanel(
                    condition = "input.jenisdata == 'tabel_frek'",
