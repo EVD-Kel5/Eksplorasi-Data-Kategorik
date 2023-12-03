@@ -2,7 +2,7 @@ library(shiny)
 library(data.table)
 library(plotly)
 
-
+#- - - - - UI - - - - - 
 ui <- navbarPage(
   title=a(tags$b("Eksplorasi Data Kategorik")) ,
   windowTitle="Eksplorasi Data Kategorik",
@@ -13,7 +13,7 @@ ui <- navbarPage(
                              choices = list('Dataset' = "datatersedia", 'Tabel Frekuensi' = "tabel_frek", 'Upload File csv' = "upload_file")),
                  conditionalPanel(
                    condition = "input.jenisdata == 'datatersedia'",
-                   selectInput(inputId = "pilih_dataset", label = "Dataset Tersedia :", choices = list('A' = "dataA", 'B' = "dataB"))
+                   selectInput(inputId = "var_kategorik", label = "Dataset Tersedia :", choices = list('Sumber Air Minum' = "Sumber Air Minum", 'Tempat Pembuangan Sampah' = "Tempat Pembuangan Sampah", 'Fasilitas BAB' = "Fasilitas Buang Air Besar"))
                  ),
                  conditionalPanel(
                    condition = "input.jenisdata == 'tabel_frek'",
@@ -21,7 +21,7 @@ ui <- navbarPage(
                  ),
                  conditionalPanel(
                    condition = "input.jenisdata == 'upload_file'",
-                   fileInput("csv_input", "Pilih CSV File", accept = ".csv"),
+                   fileInput("csv_input", "Pilih File CSV", accept = ".csv"),
                    selectInput("var_kategorik", "Variable Kategorik :", choices = c("Not Selected"))
                  ),
                  br(),
@@ -36,6 +36,7 @@ ui <- navbarPage(
                ),
                mainPanel(
                  uiOutput("selection_text"),
+                 tableOutput(outputId = "table1"),
                  plotlyOutput(outputId = "barplot")
                )
              )),
@@ -53,16 +54,28 @@ ui <- navbarPage(
 )
 
 
+#- - - - - Server - - - - -
 server <- function(input, output) {
   options(shiny.maxRequestSize=10*1024^2) 
+  
   data_input <- reactive({
-    req(input$csv_input)
-    fread(input$csv_input$datapath)
+    if(input$jenisdata == "datatersedia"){
+      url_data <- "https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"
+      fread(url_data)
+    } else if (input$jenisdata == "upload_file"){
+      req(input$csv_input)
+      fread(input$csv_input$datapath)
+    }
   })
   
   observeEvent(data_input(),{
-    choices <- c("Not Selected",names(data_input()))
+    choices <- c(names(data_input()))
     updateSelectInput(inputId = "var_kategorik", choices = choices)
+  })
+  
+  output$table1 <- renderTable({
+    req(input$var_kategorik)
+    table(data_input()[[input$var_kategorik]])
   })
 
   output$barplot <-renderPlotly({
