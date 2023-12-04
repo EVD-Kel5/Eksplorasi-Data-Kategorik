@@ -8,62 +8,56 @@ library(tidyverse)
 ui <- navbarPage(
   title=a(tags$b("Eksplorasi Data Kategorik")) ,
   windowTitle="Eksplorasi Data Kategorik",
-
-##- - - - - - - - Satu Peubah - - - - - - - -
   
-    tabPanel(title = "Satu Peubah Kategorik",
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput(inputId = "jenisdata", label = "Pilih Jenis Data :", 
-                             choices = list('Dataset' = "datatersedia", 'Tabel Frekuensi' = "tabel_frek", 'Upload File csv' = "upload_file")),
-                 conditionalPanel(
-                   condition = "input.jenisdata == 'datatersedia'",
-                   selectInput(inputId = "var_kategorik1", label = "Dataset Jawa Barat :", choices = c("Not Selected"))
-                 ),
-                 conditionalPanel(
-                   condition = "input.jenisdata == 'tabel_frek'",
-                   numericInput(inputId = "jum_kategori", label = "Banyaknya Kategori :", value = 2, min = 2, max = 30)
-                 ),
-                 conditionalPanel(
-                   condition = "input.jenisdata == 'upload_file'",
-                   fileInput("csv_input", "Pilih File CSV", accept = ".csv"),
-                   selectInput("var_kategorik", "Variable Kategorik :", choices = c("Not Selected"))
-                 ),
-                 br(),
-                 tags$b("Pilihan :"),
-                 checkboxInput("show_persen", "Tampilkan Persentase", value = FALSE),
-                 checkboxInput("show_inbars", "Tampilkan Jumlah/Persentase di Bar", value = FALSE),
-                 
-                 tags$b("Modifikasi :"),
-                 checkboxInput("modif_judul", "Judul", value = FALSE),
-                 conditionalPanel(
-                   condition = "input.modif_judul == true",
-                   textInput(inputId = "judul_baru", label = "Modifikasi Judul :", value ="")
-                 ),
-                 checkboxInput("modif_warna", "Warna", value = FALSE),
-                 radioButtons(inputId = "tambahplot", label = "Plot Tambahan :", choices = c("Tidak", "Pie Chart"), selected = "Tidak")
+  ##- - - - - - - - Satu Peubah - - - - - - - -
+  
+  tabPanel(title = "Satu Peubah Kategorik",
+           sidebarLayout(
+             sidebarPanel(
+               selectInput(inputId = "jenisdata", label = "Pilih Jenis Data :", 
+                           choices = list('Dataset' = "datatersedia", 'Upload File csv' = "upload_file")),
+               conditionalPanel(
+                 condition = "input.jenisdata == 'datatersedia'",
+                 selectInput(inputId = "var_kategorik1", label = "Dataset Jawa Barat :", choices = c("Not Selected"))
                ),
-               mainPanel(
-                 uiOutput("selection_text"),
-                 textOutput("text"),
-                 tableOutput(outputId = "table1"),
-                 plotlyOutput(outputId = "barplot")
-               )
-             )),
-
-##- - - - - - - - Dua Peubah - - - - - - - -
-
-    tabPanel(title = "Dua Peubah Kategorik",
-             sidebarLayout(
-               sidebarPanel(
-                 selectInput(inputId = "datapilihan", label = "Pilih Jenis Data", choices = c("Dataset", "Tabel Kontingensi", "Pengamatan Individu"),
-                             selected = "Dataset"),
-                 numericInput(inputId = "jum_kategori", label = "Banyaknya Kategori", value = 2, min = 2, max = 30)
+               conditionalPanel(
+                 condition = "input.jenisdata == 'upload_file'",
+                 fileInput("csv_input", "Pilih File CSV", accept = ".csv"),
+                 selectInput("var_kategorik", "Variable Kategorik :", choices = c("Not Selected"))
                ),
-               mainPanel(
-                 
-               )
-             )),
+               br(),
+               tags$b("Pilihan :"),
+               checkboxInput("show_persen", "Tampilkan Persentase", value = FALSE),
+               checkboxInput("show_inbars", "Tampilkan Jumlah/Persentase di Bar", value = FALSE),
+               checkboxInput("modif_judul", "Modifikasi Judul", value = FALSE),
+               conditionalPanel(
+                 condition = "input.modif_judul == true",
+                 textInput(inputId = "judul_baru", label = "Modifikasi Judul :", value ="")
+               ),
+               radioButtons(inputId = "tambahplot", label = "Plot Tambahan :", choices = c( "Tidak" = 'tanpa_piechart', "Pie Chart" = 'ada_piechart'), selected = 'tanpa_piechart')
+             ),
+             mainPanel(
+               uiOutput("selection_text"),
+               textOutput("text"),
+               tableOutput(outputId = "table1"),
+               plotlyOutput(outputId = "barplot"),
+               plotlyOutput(outputId = "piechart")
+             )
+           )),
+  
+  ##- - - - - - - - Dua Peubah - - - - - - - -
+  
+  tabPanel(title = "Dua Peubah Kategorik",
+           sidebarLayout(
+             sidebarPanel(
+               selectInput(inputId = "datapilihan", label = "Pilih Jenis Data", choices = c("Dataset", "Tabel Kontingensi", "Pengamatan Individu"),
+                           selected = "Dataset"),
+               numericInput(inputId = "jum_kategori", label = "Banyaknya Kategori", value = 2, min = 2, max = 30)
+             ),
+             mainPanel(
+               
+             )
+           )),
 )
 
 #- - - - - - - - Server - - - - - - - -
@@ -88,8 +82,8 @@ server <- function(input, output, session) {
       updateSelectInput(inputId = "var_kategorik", choices = choices)
     }
   })
-
-##- - - - - - - - Tabel Frekuensi - - - - - - - -
+  
+  ##- - - - - - - - Tabel Frekuensi - - - - - - - -
   
   output$text <- renderText({ 
     "Tabel Frekuensi"
@@ -100,8 +94,8 @@ server <- function(input, output, session) {
     req(input$var_kategorik1, input$var_kategorik)
     table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
   })
-    
-##- - - - - - - - Barplot - - - - - - - -
+  
+  ##- - - - - - - - Barplot - - - - - - - -
   
   output$barplot <-renderPlotly({
     req(input$jenisdata)
@@ -128,13 +122,44 @@ server <- function(input, output, session) {
       x = names(datax_persen),
       y = datax_persen,
       type = "bar",
+      color = names(datax_persen),
       hoverinfo = "y+name",
       text = if(input$show_inbars) ~paste0(round(datax_persen,2)),
       textposition = if(input$show_inbars) "outside" else "none"
     ) %>% 
       layout(title = judul_plot, 
-             yaxis = list(title = if(input$show_persen) "Persentase (%)" else "Count")
+             yaxis = list(title = if(input$show_persen) "Persentase (%)" else "Count"),
+             showlegend = FALSE
       )
+    
+  })
+  
+  
+  ##- - - - - - - - Pie Chart - - - - - - - -
+  
+  observe({
+    if(input$tambahplot == "ada_piechart"){
+      output$piechart <-renderPlotly({
+        req(input$jenisdata)
+        req(input$var_kategorik1, input$var_kategorik)
+        if(input$jenisdata == "datatersedia"){
+          judul_plot <- paste(input$var_kategorik1)
+        } else if(input$jenisdata == "upload_file"){
+          judul_plot <- paste(input$var_kategorik)
+        }
+        
+        datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
+        
+        plot_ly(
+          labels = names(datax),
+          values = datax,
+          type = "pie",
+          textinfo = "percent+labels",
+          insidetextorientation = "radial"
+        ) %>%
+          layout(title = judul_plot)
+      })
+    }
   })
 
 }
