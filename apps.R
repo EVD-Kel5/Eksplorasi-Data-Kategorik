@@ -2,7 +2,6 @@ library(shiny)
 library(data.table)
 library(plotly)
 library(tidyverse)
-library(rhandsontable)
 
 #- - - - - - - - UI - - - - - - - -
 
@@ -40,8 +39,7 @@ ui <- navbarPage(
              ),
              mainPanel(
                uiOutput("selection_text"),
-               textOutput("text"),
-               rHandsontableOutput(outputId="tabel_frekuensi"),
+               uiOutput("text"),
                tableOutput(outputId = "table1"),
                plotlyOutput(outputId = "chart")
              )
@@ -104,7 +102,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(data_input(),{
-    choices <- c("Not Selected", names(data_input()))
+    choices <- c(names(data_input()))
     if(input$jenisdata == "datatersedia"){
       updateSelectInput(inputId = "var_kategorik1", choices = choices)
     } else if(input$jenisdata == "upload_file"){
@@ -114,27 +112,29 @@ server <- function(input, output, session) {
   
   ###= = = = = = = = Tabel Frekuensi = = = = = = = =
   
-  output$tabel_frekuensi <- renderRHandsontable({
-    dataset <- data_input()
-    dataset<-as.data.frame(table(dataset))
-    dataset <- dataset %>% 
-      pivot_wider(names_from = colnames(dataset)[2], values_from = colnames(dataset)[3]) %>%
-      as.data.frame()
-    rhandsontable(
-      dataset,height =  100,width = 300,minRows=2,minCols=2,
-      readOnly = F,stretchH = "all")
-  })
-  
-  output$text <- renderText({ 
-    "Tabel Frekuensi"
+  output$text <- renderUI({
+    HTML("<b><u>Tabel Frekuensi</u></b>")
   })
   
   output$table1 <- renderTable({
     req(input$jenisdata)
     req(input$var_kategorik1, input$var_kategorik)
-    table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
-  })
- 
+    tabel_hasil1 <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
+    tabel_hasil <- as.data.frame(tabel_hasil1)
+    proporsi <- prop.table(tabel_hasil$Freq)
+    persentase <- proporsi * 100
+    
+    # Combine the results into a data frame
+    result_df <- data.frame(
+      Faktor = as.character(tabel_hasil$Var1),
+      Frekuensi = as.numeric(tabel_hasil$Freq),
+      Proporsi = proporsi,
+      Persentase = persentase,
+      row.names = NULL
+    )
+    result_df
+  }, include.rownames = FALSE)
+  
   observe({
   
   ###= = = = = = = = Barplot = = = = = = = =
