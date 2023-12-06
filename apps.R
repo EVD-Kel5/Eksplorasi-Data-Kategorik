@@ -15,7 +15,8 @@ ui <- navbarPage(
            sidebarLayout(
              sidebarPanel(
                selectInput(inputId = "jenisdata", label = "Pilih Jenis Data :", 
-                           choices = list('Dataset' = "datatersedia", 'Upload File csv' = "upload_file")),
+                           choices = list('Dataset' = "datatersedia", 'Upload File csv' = "upload_file")
+               ),
                conditionalPanel(
                  condition = "input.jenisdata == 'datatersedia'",
                  selectInput(inputId = "var_kategorik1", label = "Dataset Jawa Barat :", choices = c("Not Selected"))
@@ -32,7 +33,7 @@ ui <- navbarPage(
                checkboxInput("modif_judul", "Modifikasi Judul", value = FALSE),
                conditionalPanel(
                  condition = "input.modif_judul == true",
-                 textInput(inputId = "judul_baru", label = "Modifikasi Judul :", value ="")
+                 textInput(inputId = "judul_baru", label = "Judul Baru :", value ="")
                ),
                radioButtons(inputId = "tambahplot", label = "Plot Tambahan :", choices = c( "Tidak" = 'tanpa_piechart', "Pie Chart" = 'ada_piechart'), selected = 'tanpa_piechart')
              ),
@@ -50,12 +51,36 @@ ui <- navbarPage(
   tabPanel(title = "Dua Peubah Kategorik",
            sidebarLayout(
              sidebarPanel(
-               selectInput(inputId = "datapilihan", label = "Pilih Jenis Data", choices = c("Dataset", "Tabel Kontingensi", "Pengamatan Individu"),
-                           selected = "Dataset"),
-               numericInput(inputId = "jum_kategori", label = "Banyaknya Kategori", value = 2, min = 2, max = 30)
+               selectInput(inputId = "datapilihan", label = "Pilih Jenis Data", 
+                           choices = list('Dataset' = "datatersedia2", 'Upload File csv' = "upload_file2")),
+               conditionalPanel(
+                 condition = "input.datapilihan == 'datatersedia2'",
+                 tags$b("Dataset Jawa Barat :"),
+                 br(),
+                 selectInput(inputId = "var_cat11", label = "Variable Kategorik 1:", choices = c("Not Selected")),
+                 selectInput(inputId = "var_cat12", label = "Variable Kategorik 2:", choices = c("Not Selected"))
+               ),
+               conditionalPanel(
+                 condition = "input.datapilihan == 'upload_file2'",
+                 fileInput("csv_input2", "Pilih File CSV", accept = ".csv"),
+                 selectInput("var_cat21", "Variable Kategorik 1:", choices = c("Not Selected")),
+                 selectInput("var_cat22", "Variable Kategorik 2:", choices = c("Not Selected"))
+               ),
+               br(),
+               tags$b("Pilihan :"),
+               checkboxInput("show_persen2", "Tampilkan Persentase", value = FALSE),
+               checkboxInput("show_inbars2", "Tampilkan Jumlah/Persentase di Bar", value = FALSE),
+               checkboxInput("modif_judul2", "Modifikasi Judul", value = FALSE),
+               conditionalPanel(
+                 condition = "input.modif_judul2 == true",
+                 textInput(inputId = "judul_baru2", label = "Judul Baru :", value ="")
+               )
              ),
              mainPanel(
-               
+               uiOutput("selection_text2"),
+               textOutput("text2"),
+               tableOutput(outputId = "table2"),
+               plotlyOutput(outputId = "barplot2")
              )
            )),
 )
@@ -64,6 +89,8 @@ ui <- navbarPage(
 
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=10*1024^2) 
+  
+  ##- - - - - - - - Satu Peubah - - - - - - - -
   
   data_input <- reactive({
     if(input$jenisdata == "datatersedia"){
@@ -74,6 +101,7 @@ server <- function(input, output, session) {
       fread(input$csv_input$datapath)
     }
   })
+  
   observeEvent(data_input(),{
     choices <- c("Not Selected", names(data_input()))
     if(input$jenisdata == "datatersedia"){
@@ -83,7 +111,7 @@ server <- function(input, output, session) {
     }
   })
   
-  ##- - - - - - - - Tabel Frekuensi - - - - - - - -
+  ###= = = = = = = = Tabel Frekuensi = = = = = = = =
   
   output$text <- renderText({ 
     "Tabel Frekuensi"
@@ -95,7 +123,7 @@ server <- function(input, output, session) {
     table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
   })
   
-  ##- - - - - - - - Barplot - - - - - - - -
+  ###= = = = = = = = Barplot = = = = = = = =
   
   output$barplot <-renderPlotly({
     req(input$jenisdata)
@@ -134,8 +162,7 @@ server <- function(input, output, session) {
     
   })
   
-  
-  ##- - - - - - - - Pie Chart - - - - - - - -
+  ###= = = = = = = = Pie Chart = = = = = = = =
   
   observe({
     if(input$tambahplot == "ada_piechart"){
@@ -162,6 +189,87 @@ server <- function(input, output, session) {
     }
   })
 
+  ##- - - - - - - - Dua Peubah - - - - - - - -
+  
+  data_input2 <- reactive({
+    if(input$datapilihan == "datatersedia2"){
+      url_data2 <- "https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"
+      fread(url_data2)
+    } else if (input$datapilihan == "upload_file2"){
+      req(input$csv_input2)
+      fread(input$csv_input2$datapath)
+    }
+  })
+  
+  observeEvent(data_input2(),{
+    choices <- c("Not Selected", names(data_input2()))
+    if(input$datapilihan == "datatersedia2"){
+      updateSelectInput(inputId = "var_cat11", choices = choices)
+      updateSelectInput(inputId = "var_cat12", choices = choices)
+    } else if(input$datapilihan == "upload_file2"){
+      updateSelectInput(inputId = "var_cat21", choices = choices)
+      updateSelectInput(inputId = "var_cat22", choices = choices)
+    }
+  })
+  
+  ###= = = = = = = = Tabel Kontingensi = = = = = = = =
+  
+  output$text2 <- renderText({ 
+    "Tabel Kontingensi"
+  })
+  
+  output$table2 <- renderTable({
+    req(input$datapilihan)
+    if(input$datapilihan == "datatersedia2"){
+      req(input$var_cat11, input$var_cat12)
+      table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
+    } else {
+      req(input$var_cat21, input$var_cat22)
+      table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
+    }
+  })
+  
+  ###= = = = = = = = Barplot = = = = = = = =
+  
+  output$barplot2 <-renderPlotly({
+    req(input$datapilihan)
+    
+    if(input$modif_judul2){
+      judul_plot2 <- input$judul_baru2 
+    } else {
+      judul_plot2 <- " "
+    }
+    
+    if(input$datapilihan == "datatersedia2"){
+      req(input$var_cat11, input$var_cat12)
+      datax2 <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
+    } else {
+      req(input$var_cat21, input$var_cat22)
+      datax2 <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
+    }
+    
+    if(input$show_persen2){
+      datax_persen2 <- prop.table(datax2)*100
+    } else {
+      datax_persen2 <- datax2
+    }
+    
+    plot_ly(
+      x = names(datax_persen2),
+      y = datax_persen2,
+      type = "bar",
+      color = names(datax_persen2),
+      hoverinfo = "y+name",
+      text = if(input$show_inbars2) ~paste0(round(datax_persen2,2)),
+      textposition = if(input$show_inbars2) "outside" else "none"
+    ) %>% 
+      layout(title = judul_plot2, 
+             yaxis = list(title = if(input$show_persen2) "Persentase (%)" else "Count"),
+             showlegend = TRUE
+      )
+    
+  })
+  
 }
 
 
