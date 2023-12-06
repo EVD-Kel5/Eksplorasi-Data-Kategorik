@@ -2,6 +2,7 @@ library(shiny)
 library(data.table)
 library(plotly)
 library(tidyverse)
+library(rhandsontable)
 
 #- - - - - - - - UI - - - - - - - -
 
@@ -35,14 +36,14 @@ ui <- navbarPage(
                  condition = "input.modif_judul == true",
                  textInput(inputId = "judul_baru", label = "Judul Baru :", value ="")
                ),
-               radioButtons(inputId = "tambahplot", label = "Plot Tambahan :", choices = c( "Tidak" = 'tanpa_piechart', "Pie Chart" = 'ada_piechart'), selected = 'tanpa_piechart')
+               radioButtons(inputId = "tambahplot", label = "Tampilan Chart :", choices = c( "Bar Chart" = 'tanpa_piechart', "Pie Chart" = 'ada_piechart'), selected = 'tanpa_piechart')
              ),
              mainPanel(
                uiOutput("selection_text"),
                textOutput("text"),
+               rHandsontableOutput(outputId="tabel_frekuensi"),
                tableOutput(outputId = "table1"),
-               plotlyOutput(outputId = "barplot"),
-               plotlyOutput(outputId = "piechart")
+               plotlyOutput(outputId = "chart")
              )
            )),
   
@@ -113,6 +114,17 @@ server <- function(input, output, session) {
   
   ###= = = = = = = = Tabel Frekuensi = = = = = = = =
   
+  output$tabel_frekuensi <- renderRHandsontable({
+    dataset <- data_input()
+    dataset<-as.data.frame(table(dataset))
+    dataset <- dataset %>% 
+      pivot_wider(names_from = colnames(dataset)[2], values_from = colnames(dataset)[3]) %>%
+      as.data.frame()
+    rhandsontable(
+      dataset,height =  100,width = 300,minRows=2,minCols=2,
+      readOnly = F,stretchH = "all")
+  })
+  
   output$text <- renderText({ 
     "Tabel Frekuensi"
   })
@@ -122,57 +134,64 @@ server <- function(input, output, session) {
     req(input$var_kategorik1, input$var_kategorik)
     table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
   })
+ 
+  observe({
   
   ###= = = = = = = = Barplot = = = = = = = =
-  
-  output$barplot <-renderPlotly({
-    req(input$jenisdata)
-    req(input$var_kategorik1, input$var_kategorik)
-    if(input$jenisdata == "datatersedia"){
-      judul_plot <- paste(input$var_kategorik1)
-    } else if(input$jenisdata == "upload_file"){
-      judul_plot <- paste(input$var_kategorik)
-    }
     
-    if(input$modif_judul){
-      judul_plot <- input$judul_baru 
-    }
-    
-    datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
-    
-    if(input$show_persen){
-      datax_persen <- prop.table(datax)*100
-    } else {
-      datax_persen <- datax
-    }
-    
-    plot_ly(
-      x = names(datax_persen),
-      y = datax_persen,
-      type = "bar",
-      color = names(datax_persen),
-      hoverinfo = "y+name",
-      text = if(input$show_inbars) ~paste0(round(datax_persen,2)),
-      textposition = if(input$show_inbars) "outside" else "none"
-    ) %>% 
-      layout(title = judul_plot, 
-             yaxis = list(title = if(input$show_persen) "Persentase (%)" else "Count"),
-             showlegend = FALSE
-      )
-    
-  })
-  
-  ###= = = = = = = = Pie Chart = = = = = = = =
-  
-  observe({
-    if(input$tambahplot == "ada_piechart"){
-      output$piechart <-renderPlotly({
+    if(input$tambahplot == "tanpa_piechart"){
+      output$chart <-renderPlotly({
         req(input$jenisdata)
         req(input$var_kategorik1, input$var_kategorik)
         if(input$jenisdata == "datatersedia"){
           judul_plot <- paste(input$var_kategorik1)
         } else if(input$jenisdata == "upload_file"){
           judul_plot <- paste(input$var_kategorik)
+        }
+        
+        if(input$modif_judul){
+          judul_plot <- input$judul_baru 
+        }
+        
+        datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
+        
+        if(input$show_persen){
+          datax_persen <- prop.table(datax)*100
+        } else {
+          datax_persen <- datax
+        }
+        
+        plot_ly(
+          x = names(datax_persen),
+          y = datax_persen,
+          type = "bar",
+          color = names(datax_persen),
+          hoverinfo = "y+name",
+          text = if(input$show_inbars) ~paste0(round(datax_persen,2)),
+          textposition = if(input$show_inbars) "outside" else "none"
+        ) %>% 
+          layout(title = judul_plot, 
+                 yaxis = list(title = if(input$show_persen) "Persentase (%)" else "Count"),
+                 showlegend = FALSE
+          )
+        
+      })
+    }
+    
+    ###= = = = = = = = Pie Chart = = = = = = = =    
+    
+    if(input$tambahplot == "ada_piechart"){
+      output$chart <-renderPlotly({
+        req(input$jenisdata)
+        req(input$var_kategorik1, input$var_kategorik)
+        if(input$jenisdata == "datatersedia"){
+          judul_plot <- paste(input$var_kategorik1)
+        } else if(input$jenisdata == "upload_file"){
+          judul_plot <- paste(input$var_kategorik)
+        }
+        
+        if(input$modif_judul){
+          judul_plot <- input$judul_baru 
         }
         
         datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
