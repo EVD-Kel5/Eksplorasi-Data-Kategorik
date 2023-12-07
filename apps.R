@@ -68,7 +68,6 @@ ui <- navbarPage(
                br(),
                tags$b("Pilihan :"),
                checkboxInput("show_persen2", "Tampilkan Persentase", value = FALSE),
-               checkboxInput("show_inbars2", "Tampilkan Jumlah/Persentase di Bar", value = FALSE),
                checkboxInput("modif_judul2", "Modifikasi Judul", value = FALSE),
                conditionalPanel(
                  condition = "input.modif_judul2 == true",
@@ -276,18 +275,22 @@ server <- function(input, output, session) {
     
     datax_persen2 <- as.data.frame(datax_persen2)
     
+    if(input$datapilihan == "datatersedia2"){
+      nama_sumbux <- paste(input$var_cat11)
+    } else if(input$datapilihan == "upload_file2"){
+      nama_sumbux <- paste(input$var_cat21)
+    }
+    
     plot_ly(
       x=datax_persen2[,1],
       y = datax_persen2[,3],
       type = "bar",
       color = datax_persen2[,2],
-      hoverinfo = "y+name",
-      text = if(input$show_inbars2) ~paste0(round(rownames(datax_persen2[,2]),2)),
-      textposition = if(input$show_inbars2) "outside" else "none",
       barmode = "group"
     ) %>% 
       layout(title = judul_plot2, 
              yaxis = list(title = if(input$show_persen2) "Persentase (%)" else "Count"),
+             xaxis = list(title = nama_sumbux),
              showlegend = TRUE
       )
     
