@@ -77,7 +77,7 @@ ui <- navbarPage(
              ),
              mainPanel(
                uiOutput("selection_text2"),
-               textOutput("text2"),
+               uiOutput("text2"),
                tableOutput(outputId = "table2"),
                plotlyOutput(outputId = "barplot2")
              )
@@ -221,7 +221,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(data_input2(),{
-    choices <- c("Not Selected", names(data_input2()))
+    choices <- c(names(data_input2()))
     if(input$datapilihan == "datatersedia2"){
       updateSelectInput(inputId = "var_cat11", choices = choices)
       updateSelectInput(inputId = "var_cat12", choices = choices)
@@ -233,20 +233,21 @@ server <- function(input, output, session) {
   
   ###= = = = = = = = Tabel Kontingensi = = = = = = = =
   
-  output$text2 <- renderText({ 
-    "Tabel Kontingensi"
+  output$text2 <- renderUI({
+    HTML("<b><u>Tabel Kontingensi</u></b>")
   })
   
   output$table2 <- renderTable({
     req(input$datapilihan)
     if(input$datapilihan == "datatersedia2"){
       req(input$var_cat11, input$var_cat12)
-      table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
+      data_contingency <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
     } else {
       req(input$var_cat21, input$var_cat22)
-      table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
+      data_contingency <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
     }
-  })
+    as.data.frame.matrix(data_contingency)
+  }, include.rownames = TRUE)
   
   ###= = = = = = = = Barplot = = = = = = = =
   
@@ -273,14 +274,17 @@ server <- function(input, output, session) {
       datax_persen2 <- datax2
     }
     
+    datax_persen2 <- as.data.frame(datax_persen2)
+    
     plot_ly(
-      x = names(datax_persen2),
-      y = datax_persen2,
+      x=datax_persen2[,1],
+      y = datax_persen2[,3],
       type = "bar",
-      color = names(datax_persen2),
+      color = datax_persen2[,2],
       hoverinfo = "y+name",
-      text = if(input$show_inbars2) ~paste0(round(datax_persen2,2)),
-      textposition = if(input$show_inbars2) "outside" else "none"
+      text = if(input$show_inbars2) ~paste0(round(rownames(datax_persen2[,2]),2)),
+      textposition = if(input$show_inbars2) "outside" else "none",
+      barmode = "group"
     ) %>% 
       layout(title = judul_plot2, 
              yaxis = list(title = if(input$show_persen2) "Persentase (%)" else "Count"),
