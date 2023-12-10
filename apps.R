@@ -152,7 +152,22 @@ server <- function(input, output, session) {
           judul_plot <- input$judul_baru 
         }
         
-        datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
+        selected_var <- ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)
+        
+        if (is.numeric(data_input()[[selected_var]])) {
+          # Memberikan pemberitahuan jika variabel numerik
+          showModal(
+            modalDialog(
+              title = "Pemberitahuan",
+              "Data yang Anda pilih adalah variabel numerik. Silakan pilih variabel kategorik.",
+              easyClose = TRUE,
+              footer = NULL
+            )
+          )
+          return(NULL)
+        }
+        
+        datax <- table(data_input()[[selected_var]])
         
         if(input$show_persen){
           datax_persen <- prop.table(datax)*100
@@ -193,7 +208,22 @@ server <- function(input, output, session) {
           judul_plot <- input$judul_baru 
         }
         
-        datax <- table(data_input()[[ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)]])
+        selected_var <- ifelse(input$jenisdata == "datatersedia", input$var_kategorik1, input$var_kategorik)
+        
+        if (is.numeric(data_input()[[selected_var]])) {
+          # Memberikan pemberitahuan jika variabel numerik
+          showModal(
+            modalDialog(
+              title = "Pemberitahuan",
+              "Variabel yang anda pilih adalah variabel numerik. Silakan pilih variabel kategorik.",
+              easyClose = TRUE,
+              footer = NULL
+            )
+          )
+          return(NULL)
+        }
+        
+        datax <- table(data_input()[[selected_var]])
         
         plot_ly(
           labels = names(datax),
@@ -220,7 +250,7 @@ server <- function(input, output, session) {
   })
   
   observeEvent(data_input2(),{
-    choices <- c(names(data_input2()))
+    choices <- c("Not Selected", names(data_input2()))
     if(input$datapilihan == "datatersedia2"){
       updateSelectInput(inputId = "var_cat11", choices = choices)
       updateSelectInput(inputId = "var_cat12", choices = choices)
@@ -241,7 +271,7 @@ server <- function(input, output, session) {
     if(input$datapilihan == "datatersedia2"){
       req(input$var_cat11, input$var_cat12)
       data_contingency <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
-    } else {
+    } else if (input$datapilihan == "upload_file2"){
       req(input$var_cat21, input$var_cat22)
       data_contingency <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
     }
@@ -262,7 +292,7 @@ server <- function(input, output, session) {
     if(input$datapilihan == "datatersedia2"){
       req(input$var_cat11, input$var_cat12)
       datax2 <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
-    } else {
+    } else if (input$datapilihan == "upload_file2"){
       req(input$var_cat21, input$var_cat22)
       datax2 <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
     }
