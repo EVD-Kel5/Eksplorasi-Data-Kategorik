@@ -81,6 +81,16 @@ ui <- navbarPage(
                plotlyOutput(outputId = "barplot2")
              )
            )),
+  ##- - - - - - - - Tentang - - - - - - - -
+  
+  tabPanel(
+    title = "Tentang",
+    titlePanel("Tentang"),
+    br(),
+    "Data kategorik adalah jenis data yang variabel-variabelnya dapat dikelompokkan menjadi beberapa kelompok atau kategorik. Data kategorik yang tersedia dalam dashboard ini adalah data tentang penduduk di provinsi Jawa Barat yang bersumber dari Data Podes 2021. ",
+    br(),
+    "Eksplorasi data kategorik yang disajikan pada dashboard ini adalah eksplorasi satu peubah kategorik dengan menggunakan tabel frekuensi, barchart dan piechart; serta eksplorasi dua peubah kategorik dengan menggunakan tabel kontingensi dan barchart."
+  )
 )
 
 #- - - - - - - - Server - - - - - - - -
@@ -135,8 +145,8 @@ server <- function(input, output, session) {
   }, include.rownames = FALSE)
   
   observe({
-  
-  ###= = = = = = = = Barplot = = = = = = = =
+    
+    ###= = = = = = = = Barplot = = = = = = = =
     
     if(input$tambahplot == "tanpa_piechart"){
       output$chart <-renderPlotly({
@@ -236,7 +246,7 @@ server <- function(input, output, session) {
       })
     }
   })
-
+  
   ##- - - - - - - - Dua Peubah - - - - - - - -
   
   data_input2 <- reactive({
