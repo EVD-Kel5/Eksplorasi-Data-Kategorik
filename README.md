@@ -23,13 +23,22 @@ Eksplorasi data kategorik merupakan langkah awal dalam analisis data yang memban
 
 </div>
 
-<div align="justify">
+## :computer: Tentang Dashboard
 
-Data kategorik yang digunakan sebagai contoh pada dashboard ini adalah data tentang penduduk di provinsi Jawa Barat yang bersumber dari Data Podes 2021. Eksplorasi data kategorik yang disajikan pada dashboard ini adalah eksplorasi satu peubah kategorik dengan menggunakan tabel frekuensi, barchart dan piechart; serta eksplorasi dua peubah kategorik dengan menggunakan tabel kontingensi dan barchart.
+<div align="justify">
+  
+Data kategorik yang digunakan sebagai contoh pada dashboard ini adalah data tentang penduduk di provinsi Jawa Barat yang bersumber dari Data Podes 2021. Data ini terdiri dari Keberadaan Diare, Sumber Air Minum, Tempat Pembuangan Sampah dan Fasilitas Buang Air Besar penduduk di provinsi Jawa Barat.
 
 </div>
 
-## :fireworks: Anggota Tim Pengembang
+<div align="justify">
+  
+Eksplorasi data kategorik yang disajikan pada dashboard ini adalah eksplorasi satu peubah kategorik dengan menggunakan tabel frekuensi, barchart dan piechart; serta eksplorasi dua peubah kategorik dengan menggunakan tabel kontingensi dan barchart.
+
+</div>
+
+## :fireworks: Anggota Kelompok
+
 1. Yully Sofyah Waode     (G1501222056) 
 2. Efita Efrianti         (G1501222053)
 3. Rafika Aufa Hasibuan   (G1501222040) 
