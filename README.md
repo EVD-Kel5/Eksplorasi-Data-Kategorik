@@ -17,7 +17,7 @@ Data kategorik adalah jenis data yang variabel-variabelnya dapat dikelompokkan m
 Eksplorasi data kategorik merupakan langkah awal dalam analisis data yang membantu membentuk pemahaman yang kokoh tentang karakteristik dan pola data kategorik. Eksplorasi data kategorik memiliki beberapa tujuan utama yaitu
 1. Memahami karakteristik data
 2. Menganalisis perbandingan antara kategorik pada suatu variabel
-3. Memberikan pemahaman yang lebih baik tentang data kategorik, seperti tabel frekuensi, tabel kontongensi, bar chart dan pie chart
+3. Memberikan pemahaman yang lebih baik tentang data kategorik, seperti tabel frekuensi, tabel kontingensi, bar chart dan pie chart
 4. Menyiapkan data untuk analisi selanjutnya
 5. Menemukan pola menarik atau wawasan yang dapat membantu dalam pengambilan keputusan
 
