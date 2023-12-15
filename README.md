@@ -41,7 +41,7 @@ Eksplorasi data kategorik yang disajikan pada dashboard ini adalah
 
 ## :fireworks: Anggota Kelompok
 
-1. Yully Sofyah Waode     (G1501222056) 
-2. Efita Efrianti         (G1501222053)
-3. Rafika Aufa Hasibuan   (G1501222040) 
+1. Yully Sofyah Waode     (G1501222056)
+2. Rafika Aufa Hasibuan   (G1501222040)
+3. Efita Efrianti         (G1501222053) 
 
