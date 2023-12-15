@@ -33,7 +33,9 @@ Data kategorik yang digunakan sebagai contoh pada dashboard ini adalah data tent
 
 <div align="justify">
   
-Eksplorasi data kategorik yang disajikan pada dashboard ini adalah eksplorasi satu peubah kategorik dengan menggunakan tabel frekuensi, barchart dan piechart; serta eksplorasi dua peubah kategorik dengan menggunakan tabel kontingensi dan barchart.
+Eksplorasi data kategorik yang disajikan pada dashboard ini adalah 
+1. eksplorasi satu peubah kategorik dengan menggunakan tabel frekuensi, barchart dan piechart
+2. eksplorasi dua peubah kategorik dengan menggunakan tabel kontingensi dan barchart.
 
 </div>
 
