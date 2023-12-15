@@ -1,7 +1,7 @@
 library(shiny)
 library(data.table)
 library(plotly)
-library(tidyverse)
+library(readxl)
 
 #- - - - - - - - UI - - - - - - - -
 
@@ -96,17 +96,18 @@ ui <- navbarPage(
 #- - - - - - - - Server - - - - - - - -
 
 server <- function(input, output, session) {
-  options(shiny.maxRequestSize=10*1024^2) 
   
   ##- - - - - - - - Satu Peubah - - - - - - - -
   
   data_input <- reactive({
     if(input$jenisdata == "datatersedia"){
-      url_data <- "https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"
-      fread(url_data)
+      excel_data1 <- read.csv(url("https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"))
+      colnames(excel_data1)<-c("Keberadaan Diare","Sumber Air Minum","Tempat Pembuangan Sampah","Fasilitas Buang Air Besar")
+      return(excel_data1)
     } else if (input$jenisdata == "upload_file"){
       req(input$csv_input)
-      fread(input$csv_input$datapath)
+      uploaded_data1 <- fread(input$csv_input$datapath)
+      return(uploaded_data1)
     }
   })
   
@@ -251,16 +252,18 @@ server <- function(input, output, session) {
   
   data_input2 <- reactive({
     if(input$datapilihan == "datatersedia2"){
-      url_data2 <- "https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"
-      fread(url_data2)
+      excel_data2 <- read.csv(url("https://raw.githubusercontent.com/EVD-Kel5/Eksplorasi-Data-Kategorik/main/dataset.csv"))
+      colnames(excel_data2)<-c("Keberadaan Diare","Sumber Air Minum","Tempat Pembuangan Sampah","Fasilitas Buang Air Besar")
+      return(excel_data2)
     } else if (input$datapilihan == "upload_file2"){
       req(input$csv_input2)
-      fread(input$csv_input2$datapath)
+      uploaded_data2 <- fread(input$csv_input2$datapath)
+      return(uploaded_data2)
     }
   })
   
   observeEvent(data_input2(),{
-    choices <- c("Not Selected", names(data_input2()))
+    choices <- c(names(data_input2()))
     if(input$datapilihan == "datatersedia2"){
       updateSelectInput(inputId = "var_cat11", choices = choices)
       updateSelectInput(inputId = "var_cat12", choices = choices)
@@ -280,10 +283,10 @@ server <- function(input, output, session) {
     req(input$datapilihan)
     if(input$datapilihan == "datatersedia2"){
       req(input$var_cat11, input$var_cat12)
-      data_contingency <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
+      data_contingency <- table(data_input2()[, c(req(input$var_cat11), req(input$var_cat12))])
     } else if (input$datapilihan == "upload_file2"){
       req(input$var_cat21, input$var_cat22)
-      data_contingency <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
+      data_contingency <- table(data_input2()[, c(req(input$var_cat21), req(input$var_cat22))])
     }
     as.data.frame.matrix(data_contingency)
   }, include.rownames = TRUE)
@@ -301,10 +304,10 @@ server <- function(input, output, session) {
     
     if(input$datapilihan == "datatersedia2"){
       req(input$var_cat11, input$var_cat12)
-      datax2 <- table(data_input2()[, c(input$var_cat11, input$var_cat12), with = FALSE])
+      datax2 <- table(data_input2()[, c(req(input$var_cat11), req(input$var_cat12))])
     } else if (input$datapilihan == "upload_file2"){
       req(input$var_cat21, input$var_cat22)
-      datax2 <- table(data_input2()[, c(input$var_cat21, input$var_cat22), with = FALSE])
+      datax2 <- table(data_input2()[, c(req(input$var_cat21), req(input$var_cat22))])
     }
     
     if(input$show_persen2){
